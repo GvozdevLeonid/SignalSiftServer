@@ -1,5 +1,5 @@
 FROM python:3.11-alpine
-LABEL maintainer="g-leo.dev"
+LABEL maintainer="g-leo.fun"
 
 ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt /tmp/requirements.txt
@@ -12,7 +12,7 @@ EXPOSE 8000
 ARG DEV=false
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev libffi libffi-dev libstdc++ && \
+    apk add --update --no-cache postgresql-client jpeg-dev libffi libffi-dev libstdc++ gettext cargo && \
     apk add --update --no-cache --virtual .tmp-build-deps \
         build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
     apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main/ nodejs npm && \
@@ -24,6 +24,7 @@ RUN python -m venv /py && \
     apk del .tmp-build-deps && \
     adduser \
         --disabled-password \
+#        --no-create-home \
         django-user && \
     mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
