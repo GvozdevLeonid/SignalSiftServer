@@ -7,25 +7,6 @@ server {
 
     server_tokens off;
 
-     location /.well-known/acme-challenge/ {
-            allow all;
-            root /var/www/certbot;
-        }
-
-	location / {
-            return 301 https://${DOMAIN}$request_uri;
-        }
-}
-
-server {
-    listen 443 default_server ssl;
-    listen [::]:443 ssl;
-
-    ssl_certificate /etc/nginx/ssl/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/live/${DOMAIN}/privkey.pem;
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-
     location /static {
         alias /vol/static;
     }

@@ -2,7 +2,6 @@ from channels.generic.websocket import WebsocketConsumer
 from django.contrib.auth import authenticate
 from asgiref.sync import async_to_sync
 from django.conf import settings
-from api import models
 import base64
 import json
 import uuid
@@ -27,6 +26,7 @@ class ApiConsumer(WebsocketConsumer):
         )
 
     def _authenticate(self, data):
+        from api import models
         user = authenticate(username=data['username'], password=data['password'])
         if user is not None:
 

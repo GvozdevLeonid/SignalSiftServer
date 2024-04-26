@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.db import models
-from django.contrib.auth import get_user_model
 import uuid
 
 
 class UserData(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     files = models.JSONField(default=dict, blank=True)
     user_uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
@@ -17,7 +17,7 @@ class UserData(models.Model):
 
 
 class UserAlerts(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     alerts = models.JSONField(default=list, blank=True)
 
     class Meta:
