@@ -19,22 +19,6 @@ services:
     depends_on:
       - postgres
 
-  celery:
-    build:
-      context: .
-    restart: always
-    command: celery -A app worker -l info
-    volumes:
-      - ./app:/app
-      - static-data:/vol/web
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    depends_on:
-      - redis
-
   proxy:
     build:
       context: ./proxy
