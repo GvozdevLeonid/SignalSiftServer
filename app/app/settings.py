@@ -131,3 +131,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(2e10)
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(2e10)
+FILE_UPLOAD_HANDLERS = ["django.core.files.uploadhandler.TemporaryFileUploadHandler"]

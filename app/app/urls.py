@@ -12,7 +12,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('url', include('app_name.urls')),
+    path('', include('api.urls')),
 ]
 
 if settings.DEBUG:

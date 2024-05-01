@@ -2,7 +2,6 @@ from channels.generic.websocket import WebsocketConsumer
 from django.contrib.auth import authenticate
 from asgiref.sync import async_to_sync
 from django.conf import settings
-import base64
 import json
 import uuid
 import os
@@ -31,18 +30,26 @@ class ApiConsumer(WebsocketConsumer):
         if user is not None:
 
             self.user = user
-            self.user_data = models.UserData.objects.filter(user=user).first()
-            self.user_alerts = models.UserAlerts.objects.filter(user=user).first()
+            self.user_data = models.UserData.objects.get(user__username=data['username'])
+            self.user_alerts = models.UserAlerts.objects.get(user__username=data['username'])
 
             self.files_dir = os.path.join(settings.MEDIA_ROOT, str(self.user_data.user_uuid))
             self.url = settings.MEDIA_URL + str(self.user_data.user_uuid) + '/'
             if not os.path.exists(self.files_dir):
                 os.mkdir(self.files_dir)
 
+            self._check_files()
             self.send(json.dumps({'status': 'Success'}))
         else:
             self.send(json.dumps({'status': 'Failed'}))
             self.close()
+
+    def _check_files(self):
+        user_files = [user_file['server_filepath'].split('/')[-1] for user_file in self.user_data.files.values()]
+        for root, _, files in os.walk(self.files_dir):
+            for file in files:
+                if file not in user_files:
+                    os.remove(os.path.join(root, file))
 
     def _sync_files(self):
         self.user_data.refresh_from_db()
@@ -53,22 +60,8 @@ class ApiConsumer(WebsocketConsumer):
             'files': self.user_data.files,
         }))
 
-    def _upload_file(self, data):
+    def _file_uploaded(self, data):
         self.user_data.refresh_from_db()
-
-        user_files = self.user_data.files
-        filedata = base64.b64decode(data['filedata'])
-        filename = str(uuid.uuid4())
-        server_filepath = os.path.join(self.files_dir, filename)
-        url = self.url + filename
-        with open(server_filepath, 'wb') as file:
-            file.write(filedata)
-        user_files[data['filename']] = {'server_filepath': server_filepath, 'url': url}
-
-        self.user_data.files = user_files
-        self.user_data.save()
-        self.user_data.refresh_from_db()
-
         self.send_message_to_group({'status': 'Success', 'action': 'download_file', 'files': self.user_data.files, 'filename': data['filename']})
 
     def _remove_files(self, data):
@@ -155,8 +148,8 @@ class ApiConsumer(WebsocketConsumer):
             elif data['action'] == 'remove_alerts':
                 self._remove_alerts(data)
 
-            elif data['action'] == 'upload_file':
-                self._upload_file(data)
+            elif data['action'] == 'file_uploaded':
+                self._file_uploaded(data)
 
             elif data['action'] == 'remove_files':
                 self._remove_files(data)
